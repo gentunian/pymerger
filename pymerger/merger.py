@@ -8,6 +8,7 @@ import json
 import astunparse
 from .file_parser import parse
 from .circular_dependencies import find_circular_dependencies
+from .sorter import DependencySorter
 
 SUCCESS = '\033[32m'
 WARNING = '\033[33m'
@@ -23,7 +24,9 @@ def get_file_paths(args):
         for file in glob(arg, recursive=True):
             if file.split(".")[len(file.split("."))-1] == 'py':
                 file_paths.add(file)
-    return sorted(list(file_paths))
+    sorter = DependencySorter(list(file_paths), base_dir=".")
+    sorted_files = sorter.get_sorted_files()
+    return sorted_files
 
 
 def handle_from_import_dependencies(parsed_files):
