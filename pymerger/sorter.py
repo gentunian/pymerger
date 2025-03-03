@@ -17,7 +17,6 @@ class DependencySorter:
             rel_path = os.path.relpath(filepath, self.base_dir) if self.base_dir else filepath
             module_name = rel_path.replace(os.sep, '.').rstrip('.py')
             self.module_to_file[module_name] = filepath
-            print(f"Mapping: {module_name} -> {filepath}")
 
     def _get_imports_from_file(self, filepath: str) -> Set[str]:
         """Extract full local module dependencies from a file."""
@@ -53,7 +52,6 @@ class DependencySorter:
         except Exception as e:
             print(f"Error parsing {filepath}: {e}")
 
-        print(f"Dependencies for {module_name}: {dependencies}")
         return dependencies
 
     def _build_dependency_graph(self):
@@ -85,7 +83,6 @@ class DependencySorter:
             if module not in visited:
                 visit(module)
 
-        print("Dependency graph:", dict(self.dep_graph))
         return sorted_modules
 
     def get_sorted_files(self) -> List[str]:
