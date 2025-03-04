@@ -4,6 +4,7 @@
 import ast
 import re
 from glob import glob
+from pathlib import Path
 import json
 import astunparse
 from .file_parser import parse
@@ -115,7 +116,7 @@ def add_imports(nodes, parsed_files):
             removed_nodes.append(node)
             should_add_node = True
             for parsed_file in parsed_files:
-                if parsed_file['name'] == node['node'].module:
+                if parsed_file.get('module', parsed_file['name']) == node['node'].module:
                     should_add_node = False
             if should_add_node:
                 if node['node'].module == "__future__":
@@ -136,7 +137,7 @@ def add_imports(nodes, parsed_files):
             import_nodes_to_be_removed = []
             for name in node['node'].names:
                 for parsed_file in parsed_files:
-                    if parsed_file['name'] == name.name:
+                    if parsed_file.get('module', parsed_file['name']) == name.name:
                         import_nodes_to_be_removed.append(name)
             for import_node_to_be_removed in import_nodes_to_be_removed:
                 node['node'].names.remove(import_node_to_be_removed)
@@ -252,7 +253,8 @@ def check_collitions(nodes):
                   first_module + " and " + second_module + ENDC)
 
 
-def merge(raw_filepaths, output=None):
+def merge(raw_filepaths, output=None, project_root=None):
+    root_path = Path(project_root).resolve() if project_root else None
     file_paths = get_file_paths(raw_filepaths)
     if len(file_paths) == 0:
         print(WARNING + "No python files to be merged" + ENDC)
@@ -261,6 +263,9 @@ def merge(raw_filepaths, output=None):
     # Parse files
     parsed_files = []
     for file_path in file_paths:
+        if root_path:
+            module_path = Path(file['filepath']).relative_to(root_path.parent).with_suffix('')
+            file['module'] = str(module_path).replace('/', '.')
         parsed_files.append(parse(file_path))
 
     # Replace dependencies from 'from X import Y'
