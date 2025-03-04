@@ -186,10 +186,14 @@ def nodes_to_string(nodes):
         # Check if a all dependencies of a blocked and stisfied (not in any definition), and,
         # in that case, add it to the final string and remove the node from the nodes to be merged
         for node in nodes:
+            # First get already processed definitions
+            def_already_added = [ d for rm_node in removed_nodes for d in rm_node['definitions']]
             depedencies_stisfied = True
             for dependency in node['dependencies']:
                 for node2 in nodes:
-                    if dependency in node2['definitions']:
+                    # If dependency was not already processed and was found in the global nodes,
+                    # then dependency was not satisfied
+                    if dependency in node2['definitions'] and dependency not in def_already_added:
                         depedencies_stisfied = False
             if depedencies_stisfied:
                 string = astunparse.unparse(node['node']).strip()
