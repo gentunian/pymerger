@@ -5,6 +5,7 @@ import ast
 import re
 from glob import glob
 from pathlib import Path
+import os
 import json
 import astunparse
 from .file_parser import parse
@@ -279,7 +280,7 @@ def merge(raw_filepaths, output=None, project_root=None):
     for file in parsed_files:
         if root_path:
             module_path = Path(file['filepath']).relative_to(root_path.parent).with_suffix('')
-            file['module'] = str(module_path).replace('/', '.')
+            file['module'] = str(module_path).replace(os.sep, '.')
         for node in file['nodes']:
             nodes.append(node)
 
